@@ -55,18 +55,19 @@ body {
 /* ---- CHAT CONTAINER ---- */
 .chat-layout {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100%;
   padding: 12px;
   gap: 10px;
   overflow: hidden;
 }
 
-/* VIDÉOS — occupent 55% de la hauteur */
+/* VIDÉOS — empilées verticalement à gauche */
 .videos-row {
   display: flex;
+  flex-direction: column;
   gap: 10px;
-  flex: 0 0 55%;
+  flex: 0 0 60%; /* 60% pour la vidéo, réduit l'espace chat à droite */
   min-height: 0;
 }
 
@@ -123,8 +124,9 @@ body {
 .actions-bar {
   display: flex;
   gap: 8px;
-  justify-content: center;
+  justify-content: flex-start;
   flex-shrink: 0;
+  padding-bottom: 8px;
 }
 
 /* CHAT SECTION — prend le reste */
@@ -336,14 +338,14 @@ body {
 
 /* Tablette */
 @media (max-width: 768px) {
-  .chat-layout { padding: 8px; gap: 8px; }
-  .videos-row { flex: 0 0 48%; }
+  .chat-layout { padding: 8px; gap: 8px; flex-direction: column; }
+  .videos-row { flex-direction: row; flex: 0 0 45%; }
 }
 
 /* Mobile moyen */
 @media (max-width: 480px) {
   .header { padding: 10px 14px; }
-  .chat-layout { padding: 6px; gap: 6px; }
+  .chat-layout { padding: 6px; gap: 6px; flex-direction: column; }
   /* Sur mobile, caméras empilées verticalement */
   .videos-row {
     flex-direction: column;
@@ -351,7 +353,7 @@ body {
     gap: 6px;
   }
   .video-box { min-height: 0; flex: 1; }
-  .actions-bar { gap: 6px; }
+  .actions-bar { gap: 6px; justify-content: center; }
   .btn { padding: 8px 14px; font-size: 0.8125rem; }
   .landing-card { padding: 20px 16px; }
 }
@@ -367,9 +369,10 @@ body {
 
 /* Paysage mobile */
 @media (max-height: 500px) and (orientation: landscape) {
+  .chat-layout { flex-direction: row; }
   .videos-row {
-    flex-direction: row;
-    flex: 0 0 60%;
+    flex-direction: column;
+    flex: 0 0 50%;
   }
   .header { height: 46px; padding: 8px 16px; }
   .app-main { height: calc(100dvh - 46px); }

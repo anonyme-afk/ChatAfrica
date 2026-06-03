@@ -165,10 +165,9 @@ export default function App() {
             )}
             <div className="video-label">Inconnu</div>
           </div>
-        </div>
-
-        <div className="actions-bar">
-          <button className="btn btn-danger" onClick={nextPartner}>Suivant ⏭</button>
+          <div className="actions-bar">
+            <button className="btn btn-danger" onClick={nextPartner} style={{ width: '100%' }}>Suivant ⏭</button>
+          </div>
         </div>
 
         <div className="chat-box">
