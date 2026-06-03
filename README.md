@@ -1,41 +1,48 @@
-<h1 align = "center"> 
+# ChatAfrica
 
-![iggle](https://github.com/amitanshusahu/ChatAfrica-fullstack/assets/83657737/fdeae2a5-a5aa-456a-9160-aeb87e265e8c)
+ChatAfrica is a real-time communication platform.
 
+## Set up project
 
-</h1>
+Clone the repository and navigate into the project directory:
 
-
----
-
-<div align="center">
-  
-![gihub-thumbnail](https://github.com/amitanshusahu/ChatAfrica-fullstack/assets/83657737/7371b48d-da29-4c9b-bbb9-7b6e73207935)
-
-[🔴 watch demo on youtube](https://youtu.be/GZyKcIvQqi8)
-
-</div>
-
----
-
-## 📌 Set up project
-- clone the repo and go into it
 ```bash
-git clone https://github.com/amitanshusahu/ChatAfrica-fullstack/ & cd ChatAfrica-fullstack/
-```
-- go to the client folder and start dev server
-```bash
-cd client && npm run dev
-```
-- go to the server folder and start server
-```bash
-cd ../server && npm start
+git clone https://github.com/anonyme-afk/ChatAfrica.git
+cd ChatAfrica
 ```
 
-## Useful Links
+### Start the Client
 
-- [WebRTC Crash Course - deep dive](https://youtu.be/FExZvpVvYxA)
+Navigate to the client folder, install dependencies, and start the development server:
 
----
+```bash
+cd client
+npm install
+npm run dev
+```
 
-<h1 align="center"> Star the Repo ⭐ </h1>
+### Start the Server
+
+Navigate to the server folder, install dependencies, and start the backend server:
+
+```bash
+cd server
+npm install
+npm start
+```
+
+## Contributing
+
+Contributions are welcome. If you would like to contribute to ChatAfrica, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Commit your changes with clear messages.
+4. Push your branch to your fork.
+5. Submit a pull request describing your changes in detail.
+
+Please ensure your code follows the existing style and conventions.
+
+## License
+
+This project is open-source and available under the MIT License.
