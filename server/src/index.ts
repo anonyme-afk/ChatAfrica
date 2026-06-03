@@ -1,21 +1,20 @@
 import express from 'express';
 import cors from 'cors';
-import { Server } from 'socket.io';
-import { handelStart, handelDisconnect, getType } from './lib';
-import { GetTypesResult, room } from './types';
+import { createServer } from 'http';
+import { Server, Socket } from 'socket.io';
 
 const app = express();
 app.use(cors());
 
-// Render fournit PORT automatiquement — fallback 8000 en local
+// Render fournit PORT automatiquement
 const PORT = process.env.PORT || 8000;
 
-const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const httpServer = createServer(app);
 
-app.get('/ping', (req, res) => res.json({ status: 'alive' }));
+app.get('/', (_req, res) => res.json({ name: 'ChatAfrica Signaling Server', status: 'running' }));
+app.get('/ping', (_req, res) => res.json({ status: 'alive' }));
 
-// CORS ouvert pour Vercel + localhost dev
-const io = new Server(server, {
+const io = new Server(httpServer, {
   cors: {
     origin: [
       'http://localhost:5173',
@@ -26,65 +25,117 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
     credentials: true,
   },
-  // Permet les WebSockets + polling (fallback connexions lentes)
   transports: ['websocket', 'polling'],
+  // Timeouts généreux pour connexions lentes (Afrique)
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  upgradeTimeout: 30000,
+  // Compression pour économiser la bande passante
+  perMessageDeflate: true,
+  httpCompression: true,
 });
 
-let online: number = 0;
-let roomArr: Array<room> = [];
+// --- State ---
+interface Room {
+  roomId: string;
+  partnerId: string;
+}
 
-io.on('connection', (socket) => {
+const waitingUsers: { video: Socket[]; text: Socket[] } = {
+  video: [],
+  text: [],
+};
+const rooms = new Map<string, Room>();
+
+let online = 0;
+
+io.on('connection', (socket: Socket) => {
   online++;
   io.emit('online', online);
+  console.log(`[+] Connected: ${socket.id} | Online: ${online}`);
 
-  // on start
-  socket.on('start', cb => {
-    handelStart(roomArr, socket, cb, io);
+  // --- Matching ---
+  socket.on('find-partner', ({ mode = 'video' }: { mode?: string }) => {
+    const queue = mode === 'text' ? waitingUsers.text : waitingUsers.video;
+
+    // Retire l'utilisateur de toute file d'attente existante
+    removeFromQueues(socket);
+
+    if (queue.length > 0) {
+      const partner = queue.shift()!;
+      const roomId = `room_${socket.id}_${partner.id}`;
+
+      socket.join(roomId);
+      partner.join(roomId);
+
+      rooms.set(socket.id, { roomId, partnerId: partner.id });
+      rooms.set(partner.id, { roomId, partnerId: socket.id });
+
+      io.to(roomId).emit('partner-found', { roomId });
+      // L'initiateur crée l'offre WebRTC
+      socket.emit('init-call', { initiator: true });
+      partner.emit('init-call', { initiator: false });
+
+      console.log(`[Room] ${socket.id} ↔ ${partner.id} | Room: ${roomId}`);
+    } else {
+      queue.push(socket);
+      socket.emit('waiting');
+      console.log(`[Wait] ${socket.id} | Queue ${mode}: ${queue.length}`);
+    }
   });
 
-  // On disconnection
+  // --- WebRTC Signaling (simple-peer) ---
+  socket.on('signal', ({ signal }: { signal: unknown }) => {
+    const room = rooms.get(socket.id);
+    if (room) {
+      socket.to(room.roomId).emit('signal', { signal });
+    }
+  });
+
+  // --- Messages texte ---
+  socket.on('message', ({ text }: { text: string }) => {
+    const room = rooms.get(socket.id);
+    if (room && text?.trim()) {
+      socket.to(room.roomId).emit('message', {
+        text: text.slice(0, 500), // Limite sécurité
+        from: 'other',
+      });
+    }
+  });
+
+  // --- Suivant ---
+  socket.on('next', () => {
+    leaveRoom(socket);
+  });
+
+  // --- Déconnexion ---
   socket.on('disconnect', () => {
     online--;
     io.emit('online', online);
-    handelDisconnect(socket.id, roomArr, io);
+    removeFromQueues(socket);
+    leaveRoom(socket);
+    console.log(`[-] Disconnected: ${socket.id} | Online: ${online}`);
   });
 
-  /// ------- WebRTC signaling ------
-
-  // ice candidate relay
-  socket.on('ice:send', ({ candidate }) => {
-    let type: GetTypesResult = getType(socket.id, roomArr);
-    if (type) {
-      if (type?.type == 'p1') {
-        typeof (type?.p2id) == 'string'
-          && io.to(type.p2id).emit('ice:reply', { candidate, from: socket.id });
-      } else if (type?.type == 'p2') {
-        typeof (type?.p1id) == 'string'
-          && io.to(type.p1id).emit('ice:reply', { candidate, from: socket.id });
-      }
+  // --- Helpers ---
+  function leaveRoom(sock: Socket) {
+    const room = rooms.get(sock.id);
+    if (room) {
+      sock.to(room.roomId).emit('partner-disconnected');
+      rooms.delete(sock.id);
+      rooms.delete(room.partnerId);
+      sock.leave(room.roomId);
     }
-  });
+  }
 
-  // sdp relay
-  socket.on('sdp:send', ({ sdp }) => {
-    let type = getType(socket.id, roomArr);
-    if (type) {
-      if (type?.type == 'p1') {
-        typeof (type?.p2id) == 'string'
-          && io.to(type.p2id).emit('sdp:reply', { sdp, from: socket.id });
-      }
-      if (type?.type == 'p2') {
-        typeof (type?.p1id) == 'string'
-          && io.to(type.p1id).emit('sdp:reply', { sdp, from: socket.id });
-      }
-    }
-  });
+  function removeFromQueues(sock: Socket) {
+    (['video', 'text'] as const).forEach((mode) => {
+      const idx = waitingUsers[mode].findIndex((s) => s.id === sock.id);
+      if (idx !== -1) waitingUsers[mode].splice(idx, 1);
+    });
+  }
+});
 
-  /// --------- Messages -----------
-
-  socket.on('send-message', (input, type, roomid) => {
-    if (type == 'p1') type = 'You: ';
-    else if (type == 'p2') type = 'Stranger: ';
-    socket.to(roomid).emit('get-message', input, type);
-  });
+httpServer.listen(PORT, () => {
+  console.log(`ChatAfrica server running on port ${PORT}`);
 });
