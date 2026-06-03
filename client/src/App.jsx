@@ -22,8 +22,10 @@ export default function App() {
   const { getVideoConstraints, getAudioConstraints } = useAdaptiveVideo();
 
   useEffect(() => {
-    socketRef.current = io(import.meta.env.PROD ? '/' : 'http://localhost:8000', {
-      transports: ['polling', 'websocket'],
+    // VITE_SERVER_URL est défini sur Vercel, pointe vers Render
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:8000';
+    socketRef.current = io(SERVER_URL, {
+      transports: ['websocket', 'polling'],
     });
 
     socketRef.current.on('partner-found', () => {
