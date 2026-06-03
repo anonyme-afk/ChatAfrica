@@ -7,10 +7,16 @@ export default defineConfig({
     // Code splitting agressif
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-socket': ['socket.io-client'],
-          'vendor-peer': ['simple-peer'],
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/socket.io-client')) {
+            return 'vendor-socket';
+          }
+          if (id.includes('node_modules/simple-peer')) {
+            return 'vendor-peer';
+          }
         },
       },
     },
