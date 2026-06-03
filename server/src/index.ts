@@ -4,6 +4,7 @@ import cors from 'cors';
 app.use(cors());
 import { Server } from 'socket.io';
 const server = app.listen('8000', () => console.log('Server is up, 8000'));
+app.get('/ping', (req, res) => res.json({ status: 'alive' }));
 const io = new Server(server, { cors: { origin: '*' } });
 import { handelStart, handelDisconnect, getType } from './lib';
 import { GetTypesResult, room } from './types';

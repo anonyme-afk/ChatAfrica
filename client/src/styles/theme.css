@@ -1,0 +1,42 @@
+/* =============================================
+   CHATAFRICA — DESIGN TOKENS
+   Light: Orange + Blanc
+   Dark:  Orange + Noir
+   ============================================= */
+
+:root {
+  --ca-orange:        #FF6B00;
+  --ca-orange-light:  #FF8C38;
+  --ca-orange-dark:   #D45A00;
+  --ca-orange-glow:   rgba(255, 107, 0, 0.2);
+
+  /* CLAIR */
+  --ca-bg:            #FFFFFF;
+  --ca-bg-2:          #FFF5ED;
+  --ca-bg-card:       #FFFAF5;
+  --ca-bg-input:      #F5F5F5;
+  --ca-text:          #1A1A1A;
+  --ca-text-2:        #555555;
+  --ca-text-muted:    #999999;
+  --ca-border:        #E8E0D8;
+  --ca-shadow:        0 4px 20px rgba(0,0,0,0.08);
+  --ca-video-bg:      #111111;
+  --ca-msg-mine-bg:   #FF6B00;
+  --ca-msg-mine-text: #FFFFFF;
+  --ca-msg-bg:        #F0F0F0;
+  --ca-msg-text:      #1A1A1A;
+}
+
+[data-theme="dark"] {
+  --ca-bg:            #0D0D0D;
+  --ca-bg-2:          #151515;
+  --ca-bg-card:       #1A1A1A;
+  --ca-bg-input:      #222222;
+  --ca-text:          #F5F5F5;
+  --ca-text-2:        #AAAAAA;
+  --ca-text-muted:    #666666;
+  --ca-border:        #2A2A2A;
+  --ca-shadow:        0 4px 20px rgba(0,0,0,0.5);
+  --ca-msg-bg:        #222222;
+  --ca-msg-text:      #F5F5F5;
+}

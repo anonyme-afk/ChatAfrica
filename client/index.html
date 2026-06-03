@@ -1,24 +1,28 @@
-<!doctype html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vite App</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-  <div class="wrapper">
-    <img src="./public/black yellow minimalist Idea Logo.gif" alt="logo">
-    <button onclick="redirect()">Start</button>
-  </div>
-</body>
-<script>
-  function redirect() {
-    location.href = '/video.html'
-  }
-</script>
-
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="ChatAfrica — Chat vidéo aléatoire pour l'Afrique" />
+    <meta name="theme-color" content="#FF6B00" />
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <!-- Préconnexion aux serveurs critiques -->
+    <link rel="preconnect" href="https://stun.l.google.com" />
+    <!-- Anti-flash thème -->
+    <script>
+      (function() {
+        var s = localStorage.getItem('ca-theme');
+        var d = window.matchMedia('(prefers-color-scheme:dark)').matches;
+        document.documentElement.setAttribute('data-theme', s || (d ? 'dark' : 'light'));
+      })();
+    </script>
+    <title>ChatAfrica 🌍</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
